@@ -10,6 +10,7 @@ public class Main {
 	//TODO: start stmt and var_assg
 	//TODO: make parse method
 	//private static Pattern var_assign = Pattern.compile("^(.+) = (.+)\\.$");
+	private static ArrayList<Var> var_list = new ArrayList<Var>();
 	private static Pattern prCmd = Pattern.compile("print\\((.*)\\)");
 	private static Pattern bool_op = Pattern.compile("AND|OR|XOR|NOT|XAND");
 	private static Pattern bool = Pattern.compile("true|false");
