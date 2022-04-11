@@ -1,0 +1,7 @@
+public static main void(String args[]){
+	int x = 10;
+	int y = x+5;
+	boolean bt = true;
+	boolean bf = false;
+	String str = "hello";
+}
