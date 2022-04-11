@@ -6,7 +6,10 @@ import java.util.Scanner;
 
 
 public class Main {
+	//TODO: start stmt and var_assg
+	//TODO: make parse method
 	//private static Pattern var_assign = Pattern.compile("^(.+) = (.+)\\.$");
+	private static Pattern prCmd = Pattern.compile("print\\((.*)\\)");
 	private static Pattern bool_op = Pattern.compile("AND|OR|XOR|NOT|XAND");
 	private static Pattern bool = Pattern.compile("true|false");
 	private static Pattern digits = Pattern.compile("\\d+");
@@ -19,11 +22,15 @@ public class Main {
 		System.out.print(">> ");
 		String cmd = in.nextLine();
 		while(!cmd.equals("exit")) {
-			System.out.print(chr.matcher(cmd).matches());
+			System.out.print(prCmd.matcher(cmd).matches());
 			System.out.println();
 			System.out.print(">> ");
 		cmd = in.nextLine();
 		}
 		in.close();
+	}
+	private static void parse(String cmd) {
+		Matcher lineMatch = prCmd.matcher(cmd);
+		boolean match = lineMatch.find();
 	}
 }
