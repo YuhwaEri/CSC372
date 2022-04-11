@@ -1,0 +1,53 @@
+	//private static Pattern var_assign = Pattern.compile("^(.+) = (.+)\\.$");
+	private static ArrayList<Var> var_list = new ArrayList<Var>();
+	private static Pattern bool_op = Pattern.compile("AND|OR|XOR|NOT|XAND");
+	private static Pattern bool = Pattern.compile("true|false");
+	private static Pattern digits = Pattern.compile("\\d+");
+	private static Pattern comp = Pattern.compile("<|>|==|<=|>=");
+	private static Pattern chr = Pattern.compile("([A-Z]|[a-z]){1}");
+	private static Pattern var = Pattern.compile("\\w+");
+	private static Pattern var_assg = Pattern.compile("(.+) = (.+)");
+	/*private static Pattern bool_expr = Pattern.compile("(" + bool.pattern() + "){1}"+ "|" 
+	+ "(" + bool.pattern() + "){1} (" + bool_op.pattern() + "){1}");*/
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		System.out.print(">> ");
+		String cmd = in.nextLine();
+		while(!cmd.equals("exit")) {
+			System.out.print(chr.matcher(cmd).matches());
+			System.out.println();
+			System.out.print(">> ");
+		cmd = in.nextLine();
+		}
+		in.close();
+		var_list.add(new Var("bone", true));
+		var_list.add(new Var("btwo", true));
+	    boolean x = evaluateBExpr("bone AND btwo");
+	    System.out.println(x);
+	}
+		
+	static Var get_var_obj(String name) {
+		for(int i=0; i<var_list.size(); i++) {
+			if(var_list.get(i).name.equals(name)){
+				return var_list.get(i);
+			}
+		}
+		return null;
+	}
+	
+	static boolean evaluateBExpr(String b_expr) {
+		// x = true
+		if (b_expr.matches(".*AND.*")){
+			Pattern p = Pattern.compile("([a-z]+) .* ([a-z]+)");
+			Matcher m = p.matcher(b_expr);
+			if(m.matches()) {
+				System.out.println(m.group(1));
+				System.out.println(m.group(2));
+				boolean a = (boolean) get_var_obj(m.group(1)).value;
+				boolean b = (boolean) get_var_obj(m.group(2)).value;
+				return a && b;
+			}
+			return false;
+		}
+		return false;
+	}
