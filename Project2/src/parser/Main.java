@@ -2,6 +2,7 @@ package parser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -15,6 +16,8 @@ public class Main {
 	private static Pattern digits = Pattern.compile("\\d+");
 	private static Pattern comp = Pattern.compile("<|>|==|<=|>=");
 	private static Pattern chr = Pattern.compile("([A-Z]|[a-z]){1}");
+	private static Pattern var = Pattern.compile("\\w+");
+	private static Pattern var_assg = Pattern.compile("(.+) = (.+)");
 	/*private static Pattern bool_expr = Pattern.compile("(" + bool.pattern() + "){1}"+ "|" 
 	+ "(" + bool.pattern() + "){1} (" + bool_op.pattern() + "){1}");*/
 	public static void main(String[] args) {
@@ -29,6 +32,22 @@ public class Main {
 		}
 		in.close();
 	}
+	
+	static Var get_var_obj(String name) {
+		for(int i=0; i<var_list.size(); i++) {
+			if(var_list.get(i).name == name){
+				return var_list.get(i);
+			}
+		}
+		return null;
+	}
+	
+	boolean evaluateBExpr(String cmd) {
+		// x = true
+		return true;
+	}
+	
+	
 	private static void parse(String cmd) {
 		Matcher lineMatch = prCmd.matcher(cmd);
 		boolean match = lineMatch.find();
