@@ -20,10 +20,13 @@ public class Main {
 	private static Pattern var_assign = Pattern.compile("([a-zA-Z0-9]+) = (.+)");
 	private static Pattern cmd = Pattern.compile("^print\\s+(.+)");
 	private static Pattern bool = Pattern.compile("true|false");
+	private static Pattern bool_op = Pattern.compile(".*(AND|OR|NOT).*");
+	private static Pattern comp = Pattern.compile("<|<=|==|!=|>=|>");
 	private static Pattern digits = Pattern.compile("\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
 	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
+	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
 	
 	public static void main(String args[]) {
 		BufferedReader reader;
@@ -50,33 +53,86 @@ public class Main {
 	}
 	
 	//Distinguishes the type of statements and calls appropriate function
-	public static String parseLine(String line, BufferedReader reader){
+	public static String parseLine(String line, BufferedReader reader) throws IOException{
 		
 		if (line.matches(var_assign.pattern())){
-			return read_var_assign(line);
+			return read_var_assign(line) + ";";
 		}
 		if (line.matches(cmd.pattern())) {
-			return read_cmd(line);
+			return read_cmd(line) + ";";
+		}
+		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
+			Matcher m = cond.matcher(line);
+			m.matches();
+			String rhs = m.group(2);
+			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
+			String line2 = reader.readLine().replaceAll("\\t", "");
+			while(!line2.equals("end")) {
+				result+= "\t";
+				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
+				System.out.println(result);
+				result+= "\n";
+				line2 = reader.readLine().replaceAll("\\t", "");
+			}
+			result+= "}";
+			return result;
 		}
 		if (line.matches(loop.pattern())) {
-			// To be implemented. Check read_loop
+			// To be implemented. check conditional code for an idea of how
+			// to implement nests.
 		}
+		else {
+			System.out.println("No match in: " + line);
+		}
+		return "";
+	}
+	
+	public static String read_bool_expr(String line) {
+		String result = "";
+		String token[] = line.split("\\s");
+		for(int i=0; i<token.length; i++) {
+			if(token[i].matches(bool_op.pattern())) {
+				Matcher bm = bool_op.matcher(token[i]);
+				result+= get_bool_op(bm.group(1));
+			}
+			if(token[i].matches(comp.pattern())) {
+				result+= token[i];
+			}
+			
+			if(token[i].matches(digits.pattern())) {
+				result+= token[i];
+			}
+			
+			if(token[i].matches(var.pattern())) {
+				result+= token[i];
+			}
+		}
+		
+		return result;
+	}
+	
+	static String get_bool_op(String bool_op) {
+		if(bool_op.equals("AND")) return "&&";
+		if(bool_op.equals("NOT")) return "!";
+		if(bool_op.equals("OR")) return "||";
 		return "";
 	}
 	
 	public static String read_loop(String cmd, BufferedReader reader) {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
+		
 		return "";
 	}
 	
 	public static String read_cmd(String line) {
-		String jcmd = "System.out.print(";
-		String jcmd2 = ")";
+		String prefix = "System.out.print(";
+		String suffix = ")";
 		String result = "";
 		
 		Matcher m = cmd.matcher(line);
 		m.matches();
-		String token[] = m.group(1).split("\\s");
+		
+		String token[] = tokenize(m.group(1));
 		
 		for(int i=0; i < token.length; i++) {
 			if(token[i].matches(str.pattern())) {
@@ -88,8 +144,34 @@ public class Main {
 			if(token[i].matches(var.pattern())){
 				result += token[i];
 			}
+			if(token[i].matches(digits.pattern())) {
+				result += "\"" + token[i] + "\"";
+			}
 		}
-		return jcmd + result + jcmd2;
+		return prefix + result + suffix;
+	}
+	
+	// Splits string but internal string and whitespace
+	// Ex.      "foo bar" + x + y
+	// Becomes ["foo bar", +, x, +, y]
+	public static String[] tokenize(String rhs) {
+		String token[] = rhs.split("(?=\"\\w*\")");
+		ArrayList<String> tmp = new ArrayList<String>();
+		for(int i=0; i<token.length; i++){
+			if(!token[i].matches(str.pattern())) {
+				String[] tmp2 = token[i].split("\\s");
+				for (int j=0; j<tmp2.length; j++) {
+					tmp.add(tmp2[j]);
+				}
+			}
+			else {
+				tmp.add(token[i]);
+			}
+		}
+		
+		String[] result = new String[tmp.size()];
+		tmp.toArray(result);
+		return result;
 	}
 	
 	public static String read_var_assign(String line) {

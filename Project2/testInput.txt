@@ -4,4 +4,13 @@ bt = true
 bf = false
 str = "hello"
 print "world"
-print str + "world"
+print str + "world" + "!"
+i = x
+
+if i < y
+	print 5 + 2
+	if y < 30
+		print "more stuff"
+	end
+end
+	
