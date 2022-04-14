@@ -90,7 +90,7 @@ public class Main {
 				
 				
 				line2 = next.replaceAll("\\t", "");
-			}
+			}//TODO: make this know when if is over, results for expected and actual in out.java
 			result+= "}";
 			return result;
 		}
