@@ -28,13 +28,16 @@ public class Main {
 	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
 	
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
 		FileWriter writer;
 		try {
+			if (args.length == 0) throw new Exception("Command line input required");
+			String input = args[0];		//for implementation
+			//input = "testInput.txt";	//for testing
 			String output = "out";
 			reader = new BufferedReader(new FileReader(
-					"testInput.txt"));
+					input));
 			writer = new FileWriter(output + ".java");
 			writer.write("public class " + output + "{\n");
 			writer.write("\tpublic static void main(String args[]) {\n");
