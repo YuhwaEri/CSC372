@@ -33,8 +33,8 @@ public class Main {
 		FileWriter writer;
 		try {
 			if (args.length == 0) throw new Exception("Command line input required");
-			String input = args[0];		//for implementation
-			//input = "testInput.txt";	//for testing
+			//String input = args[0];		//for implementation
+			String input = "test.txt";	//for testing
 			String output = "out";
 			reader = new BufferedReader(new FileReader(
 					input));
@@ -43,6 +43,7 @@ public class Main {
 			writer.write("\tpublic static void main(String args[]) {\n");
 			String line = reader.readLine();
 			while(line != null) {
+				//System.out.println(line); //comment out when finished
 				String writeOut = parseLine(line, reader);
 				writer.write("\t\t" + writeOut + "\n");
 				line = reader.readLine();
@@ -50,6 +51,7 @@ public class Main {
 			writer.write("\t}\n}");
 			reader.close();
 			writer.close();
+			System.out.println("Parsing finished!");
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -70,15 +72,24 @@ public class Main {
 		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
 			Matcher m = cond.matcher(line);
 			m.matches();
+			System.out.println(m.group(1) + "\n"); //TODO: comment out when finished
 			String rhs = m.group(2);
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
+			System.out.println(); //TODO: comment out when finished
 			while(!line2.equals("end")) {
 				result+= "\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
-				System.out.println(result);
+				System.out.println(result); //TODO: comment out when done
 				result+= "\n";
-				line2 = reader.readLine().replaceAll("\\t", "");
+				
+				String next = reader.readLine();
+				if (next == null) {
+					break; //band aid solution
+				}
+				
+				
+				line2 = next.replaceAll("\\t", "");
 			}
 			result+= "}";
 			return result;
@@ -86,6 +97,7 @@ public class Main {
 		if (line.matches(loop.pattern())) {
 			// To be implemented. check conditional code for an idea of how
 			// to implement nests.
+			//TODO: implement this
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -126,7 +138,7 @@ public class Main {
 	
 	public static String read_loop(String cmd, BufferedReader reader) {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
-		
+		//TODO: implement this
 		return "";
 	}
 	
@@ -180,6 +192,7 @@ public class Main {
 		return result;
 	}
 	
+	//TODO: need to update this for variables that already exist
 	public static String read_var_assign(String line) {
 		if(var_assign.matcher(line).matches()) {
 			Matcher m = var_assign.matcher(line);
