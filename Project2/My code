@@ -28,30 +28,22 @@ public class Main {
 	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
 	
-	public static void main(String args[]) throws Exception {
+	public static void main(String args[]) {
 		BufferedReader reader;
 		FileWriter writer;
 		try {
-			if (args.length == 0) throw new Exception("Command line input required");
-			//String input = args[0];		//for implementation
-			String input = "test.txt";	//for testing
-			String output = "out";
 			reader = new BufferedReader(new FileReader(
-					input));
-			writer = new FileWriter(output + ".java");
-			writer.write("public class " + output + "{\n");
-			writer.write("\tpublic static void main(String args[]) {\n");
+					"testInput.txt"));
+			writer = new FileWriter("out.java");
+			
 			String line = reader.readLine();
 			while(line != null) {
-				//System.out.println(line); //comment out when finished
 				String writeOut = parseLine(line, reader);
-				if(!writeOut.equals("")) writer.write("\t\t" + writeOut + "\n");
+				writer.write(writeOut + "\n");
 				line = reader.readLine();
 			}
-			writer.write("\t}\n}");
 			reader.close();
 			writer.close();
-			System.out.println("Parsing finished!");
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -72,24 +64,22 @@ public class Main {
 		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
 			Matcher m = cond.matcher(line);
 			m.matches();
-			System.out.println(m.group(1) + "\n"); //TODO: comment out when finished
 			String rhs = m.group(2);
-			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n\t\t";
+			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
 			while(!line2.equals("end")) {
 				result+= "\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
-				System.out.println(result); //TODO: comment out when done
+				System.out.println(result);
 				result+= "\n";
 				line2 = reader.readLine().replaceAll("\\t", "");
 			}
-			result+= "\t\t}";
+			result+= "}";
 			return result;
 		}
 		if (line.matches(loop.pattern())) {
 			// To be implemented. check conditional code for an idea of how
 			// to implement nests.
-			//TODO: implement this
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -130,7 +120,7 @@ public class Main {
 	
 	public static String read_loop(String cmd, BufferedReader reader) {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
-		//TODO: implement this
+		
 		return "";
 	}
 	
@@ -178,12 +168,12 @@ public class Main {
 				tmp.add(token[i]);
 			}
 		}
+		
 		String[] result = new String[tmp.size()];
 		tmp.toArray(result);
 		return result;
 	}
 	
-	//TODO: need to update this for variables that already exist
 	public static String read_var_assign(String line) {
 		if(var_assign.matcher(line).matches()) {
 			Matcher m = var_assign.matcher(line);
