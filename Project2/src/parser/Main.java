@@ -75,8 +75,11 @@ public class Main {
 			Matcher m = cond.matcher(line);
 			m.matches();
 			String rhs = m.group(2) + m.group(3) + m.group(4);
-			if (!var.matcher(m.group(4)).find()) {
+			String tempVal = m.group(4).trim();
+			if (!var.matcher(tempVal).find() && !bool.matcher(tempVal).find() &&
+				!digits.matcher(tempVal).find() && !str.matcher(tempVal).find()) {
 				System.out.println("No match in: " + line);
+				return "";
 			}
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
