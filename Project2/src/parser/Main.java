@@ -75,8 +75,10 @@ public class Main {
 			Matcher m = cond.matcher(line);
 			m.matches();
 			String rhs = m.group(2) + m.group(3) + m.group(4);
-			System.out.println("Group 3:" + m.group(3));
-			System.out.println("Group 4:" + m.group(4));
+			var.matcher(m.group(4)).find();
+			if (!var.matcher(m.group(4)).find()) {
+				System.out.println("No match in: " + line);
+			}
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
 			while(!line2.equals("end")) {
@@ -106,7 +108,6 @@ public class Main {
 	public static String read_bool_expr(String line) {
 		String result = "";
 		String token[] = line.split("\\s");
-		System.out.println(Arrays.toString(token));
 		for(int i=0; i<token.length; i++) {
 			if(token[i].matches(bool_op.pattern())) {
 				Matcher bm = bool_op.matcher(token[i]);
