@@ -3,14 +3,12 @@ package parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 
 
 public class Main {
@@ -34,7 +32,7 @@ public class Main {
 		try {
 			if (args.length == 0) throw new Exception("Command line input required");
 			//String input = args[0];		//for implementation
-			String input = "test.txt";	//for testing
+			String input = "testInput.txt";	//for testing
 			String output = "out";
 			reader = new BufferedReader(new FileReader(
 					input));
@@ -72,14 +70,13 @@ public class Main {
 		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
 			Matcher m = cond.matcher(line);
 			m.matches();
-			System.out.println(m.group(1) + "\n"); //TODO: comment out when finished
 			String rhs = m.group(2);
-			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n\t\t";
+			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
 			while(!line2.equals("end")) {
-				result+= "\t";
+				result+= "\t\t\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
-				System.out.println(result); //TODO: comment out when done
+				System.out.println(result);
 				result+= "\n";
 				line2 = reader.readLine().replaceAll("\\t", "");
 			}
@@ -89,7 +86,6 @@ public class Main {
 		if (line.matches(loop.pattern())) {
 			// To be implemented. check conditional code for an idea of how
 			// to implement nests.
-			//TODO: implement this
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -130,7 +126,7 @@ public class Main {
 	
 	public static String read_loop(String cmd, BufferedReader reader) {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
-		//TODO: implement this
+		
 		return "";
 	}
 	
@@ -178,12 +174,12 @@ public class Main {
 				tmp.add(token[i]);
 			}
 		}
+		
 		String[] result = new String[tmp.size()];
 		tmp.toArray(result);
 		return result;
 	}
 	
-	//TODO: need to update this for variables that already exist
 	public static String read_var_assign(String line) {
 		if(var_assign.matcher(line).matches()) {
 			Matcher m = var_assign.matcher(line);
@@ -211,3 +207,4 @@ public class Main {
 		return "";
 	}
 }
+	

@@ -1,19 +1,15 @@
 package parser;
 
-public class Var<T> {
+public class Var {
 	String name;
-	T value;
+	String type;
 	
 	public Var(String name){
 		this.name = name;
 	}
 	
-	public Var(String name, T value) {
+	public Var(String name, String type) {
 		this.name = name;
-		this.value = value;
-	}
-	
-	public T getValue() {
-		return this.value;
+		this.type = type;
 	}
 }
