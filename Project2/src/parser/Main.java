@@ -75,7 +75,6 @@ public class Main {
 			Matcher m = cond.matcher(line);
 			m.matches();
 			String rhs = m.group(2) + m.group(3) + m.group(4);
-			var.matcher(m.group(4)).find();
 			if (!var.matcher(m.group(4)).find()) {
 				System.out.println("No match in: " + line);
 			}
