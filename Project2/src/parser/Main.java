@@ -29,7 +29,6 @@ public class Main {
 	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
 	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
-	private static Pattern func = Pattern.compile("^func ([a-zA-Z]{1}\\w*)(\\(\\))()");
 	
 	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
@@ -239,8 +238,8 @@ public class Main {
 		String token[] = tokenize(rhs);
 		for(int i=0;i<token.length;i++) {
 			result += " ";
-			System.out.println(token[i]);
-			if(token[i].matches(var.pattern()) && !token[i].matches(bool.pattern())) {
+			if(token[i].matches(var.pattern()) && !token[i].matches(bool.pattern())
+					&& !token[i].matches(bool_op.pattern())) {
 				if(var_map.get(token[i]).equals("int") && type.equals("double")) {
 					result += "(double)" + token[i];
 				}
@@ -269,6 +268,7 @@ public class Main {
 			//Simples
 			if(token[i].matches(comp.pattern())) return "boolean";
 			if(token[i].matches(bool.pattern())) return "boolean";
+			if(token[i].matches(bool_op.pattern())) return "boolean";
 			if(token[i].matches(deci.pattern())) hasFloat = true;
 			if(token[i].matches(str.pattern())) hasString = true;
 			if(token[i].matches(digits.pattern())) hasInt = true;

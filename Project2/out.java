@@ -7,6 +7,7 @@ public class out{
 		int b = x % 10;
 		boolean bt = true;
 		boolean bf = false;
+		boolean z = bt AND bf;
 		String str = "hello";
 		System.out.print("world");
 		System.out.print(str + "world" + "!");
