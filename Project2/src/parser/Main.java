@@ -45,7 +45,7 @@ public class Main {
 			String writeOut;
 			while(line != null) {
 				//System.out.println(line); //comment out when finished
-				if (line.equals("")) writeOut = "";
+				if (line.trim().equals("")) writeOut = "";//empty lines
 				else writeOut = parseLine(line, reader);
 				writer.write("\t\t" + writeOut + "\n");
 				line = reader.readLine();
@@ -100,6 +100,14 @@ public class Main {
 			// To be implemented. check conditional code for an idea of how
 			// to implement nests.
 			//TODO: implement this
+			Matcher m = loop.matcher(line);
+			m.matches();
+			String rhs = m.group(1);
+			System.out.println(rhs);
+			if (false) {//checks for syntax error in loop condition
+				System.out.println("No match in: " + line);
+				return "";
+			}
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -109,7 +117,9 @@ public class Main {
 	
 	public static String read_bool_expr(String line) {
 		String result = "";
-		String token[] = line.split("\\s");
+		String token[] = line.split(" ");
+		System.out.println(line);
+
 		for(int i=0; i<token.length; i++) {
 			if(token[i].matches(bool_op.pattern())) {
 				Matcher bm = bool_op.matcher(token[i]);
@@ -127,7 +137,6 @@ public class Main {
 				result+= token[i];
 			}
 		}
-		
 		return result;
 	}
 	
