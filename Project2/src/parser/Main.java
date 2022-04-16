@@ -223,6 +223,7 @@ public class Main {
 			}
 			String rhs = m.group(2);
 			String type = getType(rhs);
+			if (type.equals("")) return "";
 			var_map.put(m.group(1), type);
 			return type + " " + line;
 		}
@@ -239,7 +240,7 @@ public class Main {
 			return var_map.get(m.group(1));
 		}
 		else {
-			System.out.println("Nothing found" + val);
+			System.out.println("Nothing found in " + val);
 		}
 		return "";
 	}
