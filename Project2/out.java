@@ -12,9 +12,6 @@ public class out{
 		System.out.print("world");
 		System.out.print(str + "world" + "!");
 		int i = x;
-		
-		int foo = 10;
-		
 		while(i < x){
 			while(b < x){
 			b = b + 1;

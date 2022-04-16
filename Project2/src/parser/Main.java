@@ -35,8 +35,7 @@ public class Main {
 		FileWriter writer;
 		try {
 			if (args.length == 0) throw new Exception("Command line input required");
-			//String input = args[0];		//for implementation
-			String input = "testInput.txt";	//for testing
+			String input = args[0];		//for implementation
 			String output = "out";
 			reader = new BufferedReader(new FileReader(
 					input));
