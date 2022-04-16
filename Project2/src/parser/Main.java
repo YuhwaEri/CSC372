@@ -25,7 +25,7 @@ public class Main {
 	private static Pattern digits = Pattern.compile("\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
-	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
+	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	
 	public static void main(String args[]) throws Exception {
@@ -75,9 +75,7 @@ public class Main {
 			Matcher m = cond.matcher(line);
 			m.matches();
 			String rhs = m.group(2) + m.group(3) + m.group(4);
-			String tempVal = m.group(4).trim();
-			if (!var.matcher(tempVal).find() && !bool.matcher(tempVal).find() &&
-				!digits.matcher(tempVal).find() && !str.matcher(tempVal).find()) {
+			if (invalidV(m.group(4).trim())) {
 				System.out.println("No match in: " + line);
 				return "";
 			}
@@ -102,12 +100,13 @@ public class Main {
 			//TODO: implement this
 			Matcher m = loop.matcher(line);
 			m.matches();
-			String rhs = m.group(1);
-			System.out.println(rhs);
-			if (false) {//checks for syntax error in loop condition
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {//checks for syntax error in loop condition
 				System.out.println("No match in: " + line);
 				return "";
 			}
+			return m.group(1) + "(" + rhs + "){\n" + read_loop(reader) + "\t}";
+			
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -118,7 +117,6 @@ public class Main {
 	public static String read_bool_expr(String line) {
 		String result = "";
 		String token[] = line.split(" ");
-		System.out.println(line);
 
 		for(int i=0; i<token.length; i++) {
 			if(token[i].matches(bool_op.pattern())) {
@@ -147,10 +145,23 @@ public class Main {
 		return "";
 	}
 	
-	public static String read_loop(String cmd, BufferedReader reader) {
+	public static String read_loop(BufferedReader reader) throws IOException {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
 		//TODO: implement this
-		return "";
+		String nextLine = reader.readLine();
+		String result = "";
+		if (nextLine == null) throw new IOException("Loop statement requires end block");
+		nextLine = nextLine.replaceAll("\\t", "");
+		while (!nextLine.equals("end")) {
+			if (!nextLine.equals("")) result += "\t" + parseLine(nextLine, reader) + "\n";
+			
+			nextLine = reader.readLine();
+			if (nextLine == null) {
+				throw new IOException("Loop statement requires end block");
+			}
+			nextLine = nextLine.replaceAll("\\t", "");
+		}
+		return result;
 	}
 	
 	public static String read_cmd(String line) {
@@ -231,5 +242,10 @@ public class Main {
 			System.out.println("Nothing found" + val);
 		}
 		return "";
+	}
+	
+	public static boolean invalidV(String v) {
+		return !var.matcher(v).find() && !bool.matcher(v).find() &&
+				!digits.matcher(v).find() && !str.matcher(v).find();
 	}
 }
