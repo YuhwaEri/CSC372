@@ -1,0 +1,13 @@
+b1 = true
+b2 = false
+b3 = b1 AND b2
+print b3
+x = 1 + 2
+while (x < 4)
+	x = x + 1
+end
+
+if x == 4
+print x + "\n"
+end
+
