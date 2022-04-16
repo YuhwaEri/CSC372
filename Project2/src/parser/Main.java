@@ -78,7 +78,7 @@ public class Main {
 			while(!line2.equals("end")) {
 				result+= "\t\t\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
-				System.out.println(result);
+				//System.out.println(result);
 				result+= "\n";
 				line2 = reader.readLine().replaceAll("\\t", "");
 			}
@@ -202,7 +202,7 @@ public class Main {
 		String token[] = tokenize(rhs);
 		for(int i=0;i<token.length;i++) {
 			result += " ";
-			System.out.println(token[i]);
+			//System.out.println(token[i]);
 			if(token[i].matches(var.pattern()) && !token[i].matches(bool.pattern())) {
 				if(var_map.get(token[i]).equals("int") && type.equals("double")) {
 					result += "(double)" + token[i];
