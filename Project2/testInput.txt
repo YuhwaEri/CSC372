@@ -10,6 +10,13 @@ print "world"
 print str + "world" + "!"
 i = x
 
+while i < x
+	while b < x
+		b = b + 1
+	end
+	i = i + 1
+end
+
 if i < y
 	print 5 + 2
 	if y < 30

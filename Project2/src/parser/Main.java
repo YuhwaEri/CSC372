@@ -3,13 +3,15 @@ package parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Scanner;
+import java.util.Arrays;
 
 public class Main {
 	
@@ -24,9 +26,9 @@ public class Main {
 	private static Pattern deci = Pattern.compile("\\d+.\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
-	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
-	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
 	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
+	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
+	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	
 	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
@@ -42,10 +44,13 @@ public class Main {
 			writer.write("public class " + output + "{\n");
 			writer.write("\tpublic static void main(String args[]) {\n");
 			String line = reader.readLine();
+			String writeOut;
 			while(line != null) {
 				//System.out.println(line); //comment out when finished
-				String writeOut = parseLine(line, reader);
-				if(!writeOut.equals("")) writer.write("\t\t" + writeOut + "\n");
+				if (!line.trim().equals("")) {
+					writeOut = parseLine(line, reader);
+					writer.write("\t\t" + writeOut + "\n");
+				}
 				line = reader.readLine();
 			}
 			writer.write("\t}\n}");
@@ -72,15 +77,22 @@ public class Main {
 		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
 			Matcher m = cond.matcher(line);
 			m.matches();
-			String rhs = m.group(2);
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {
+				System.out.println("No match in: " + line);
+				return "";
+			}
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
 			while(!line2.equals("end")) {
 				result+= "\t\t\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
-				System.out.println(result);
 				result+= "\n";
-				line2 = reader.readLine().replaceAll("\\t", "");
+				String next = reader.readLine();
+				if (next == null) {
+					throw new IOException("Conditional statement requires end block");
+				}
+				line2 = next.replaceAll("\\t", "");
 			}
 			result+= "\t\t}";
 			return result;
@@ -88,7 +100,18 @@ public class Main {
 		if (line.matches(loop.pattern())) {
 			// To be implemented. check conditional code for an idea of how
 			// to implement nests.
+			//TODO: implement this
+			Matcher m = loop.matcher(line);
+			m.matches();
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {//checks for syntax error in loop condition
+				System.out.println("No match in: " + line);
+				return "";
+			}
+			return m.group(1) + "(" + rhs + "){\n" + read_loop(reader) + "\t}";
+			
 		}
+		
 		else {
 			System.out.println("No match in: " + line);
 		}
@@ -97,7 +120,8 @@ public class Main {
 	
 	public static String read_bool_expr(String line) {
 		String result = "";
-		String token[] = line.split("\\s");
+		String token[] = line.split(" ");
+
 		for(int i=0; i<token.length; i++) {
 			if(token[i].matches(bool_op.pattern())) {
 				Matcher bm = bool_op.matcher(token[i]);
@@ -115,7 +139,6 @@ public class Main {
 				result+= token[i];
 			}
 		}
-		
 		return result;
 	}
 	
@@ -126,10 +149,23 @@ public class Main {
 		return "";
 	}
 	
-	public static String read_loop(String cmd, BufferedReader reader) {
+	public static String read_loop(BufferedReader reader) throws IOException {
 		// Reader object to read next lines, "end" string to signal nest end(maybe)
-		
-		return "";
+		//TODO: implement this
+		String nextLine = reader.readLine();
+		String result = "";
+		if (nextLine == null) throw new IOException("Loop statement requires end block");
+		nextLine = nextLine.replaceAll("\\t", "");
+		while (!nextLine.equals("end")) {
+			if (!nextLine.equals("")) result += "\t" + parseLine(nextLine, reader) + "\n";
+			
+			nextLine = reader.readLine();
+			if (nextLine == null) {
+				throw new IOException("Loop statement requires end block");
+			}
+			nextLine = nextLine.replaceAll("\\t", "");
+		}
+		return result;
 	}
 	
 	public static String read_cmd(String line) {
@@ -252,7 +288,10 @@ public class Main {
 		if(hasString && !hasFloat && !hasInt && plusOnly) return "String";
 		if(hasFloat && hasMath) return "double";
 		return "int";
-		
+	}
+	
+	public static boolean invalidV(String v) {
+		return !var.matcher(v).find() && !bool.matcher(v).find() &&
+				!digits.matcher(v).find() && !str.matcher(v).find();
 	}
 }
-	

@@ -11,6 +11,12 @@ public class out{
 		System.out.print("world");
 		System.out.print(str + "world" + "!");
 		int i = x;
+		while(i < x){
+	while(b < x){
+	b = b + 1;
+	}
+	i = i + 1;
+	}
 		if(i<y){
 			System.out.print("5" + "2");
 			if(y<30){
