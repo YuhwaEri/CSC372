@@ -5,17 +5,20 @@ public class out{
 		y = x / 5;
 		double a = (double)x + 0.5;
 		int b = x % 10;
-		int bt = true;
-		int bf = false;
-		int str = "hello";
+		boolean bt = true;
+		boolean bf = false;
+		String str = "hello";
 		System.out.print("world");
 		System.out.print(str + "world" + "!");
 		int i = x;
+		
+		int foo = 10;
+		
 		while(i < x){
-	while(b < x){
-	b = b + 1;
+			while(b < x){
+			b = b + 1;
 	}
-	i = i + 1;
+			i = i + 1;
 	}
 		if(i<y){
 			System.out.print("5" + "2");

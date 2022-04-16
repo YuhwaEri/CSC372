@@ -29,6 +29,7 @@ public class Main {
 	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
 	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
+	private static Pattern func = Pattern.compile("^func ([a-zA-Z]{1}\\w*)(\\(\\))()");
 	
 	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
@@ -157,7 +158,7 @@ public class Main {
 		if (nextLine == null) throw new IOException("Loop statement requires end block");
 		nextLine = nextLine.replaceAll("\\t", "");
 		while (!nextLine.equals("end")) {
-			if (!nextLine.equals("")) result += "\t" + parseLine(nextLine, reader) + "\n";
+			if (!nextLine.equals("")) result += "\t\t\t" + parseLine(nextLine, reader) + "\n";
 			
 			nextLine = reader.readLine();
 			if (nextLine == null) {
@@ -267,6 +268,7 @@ public class Main {
 		for(int i=0; i<token.length;i++) {
 			//Simples
 			if(token[i].matches(comp.pattern())) return "boolean";
+			if(token[i].matches(bool.pattern())) return "boolean";
 			if(token[i].matches(deci.pattern())) hasFloat = true;
 			if(token[i].matches(str.pattern())) hasString = true;
 			if(token[i].matches(digits.pattern())) hasInt = true;
@@ -283,7 +285,6 @@ public class Main {
 				if(var_map.get(token[i]) == "int") hasInt = true;
 			}
 		}
-		if(!hasMath) plusOnly = false;
 		
 		if(hasString && !hasFloat && !hasInt && plusOnly) return "String";
 		if(hasFloat && hasMath) return "double";
