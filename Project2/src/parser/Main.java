@@ -254,6 +254,7 @@ public class Main {
 		for(int i=0; i<token.length;i++) {
 			//Simples
 			if(token[i].matches(comp.pattern())) return "boolean";
+			if(token[i].matches(bool.pattern())) return "boolean";
 			if(token[i].matches(deci.pattern())) hasFloat = true;
 			if(token[i].matches(str.pattern())) hasString = true;
 			if(token[i].matches(digits.pattern())) hasInt = true;
@@ -270,12 +271,10 @@ public class Main {
 				if(var_map.get(token[i]) == "int") hasInt = true;
 			}
 		}
-		if(!hasMath) plusOnly = false;
 		
 		if(hasString && !hasFloat && !hasInt && plusOnly) return "String";
 		if(hasFloat && hasMath) return "double";
 		return "int";
-		
 	}
 	
 	public static boolean invalidV(String v) {
