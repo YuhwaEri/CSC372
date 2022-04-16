@@ -1,5 +1,8 @@
 x = 10
 y = x + 5
+y = x / 5
+a = x + 0.5
+b = x % 10
 bt = true
 bf = false
 str = "hello"

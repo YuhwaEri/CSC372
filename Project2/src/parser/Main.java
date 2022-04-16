@@ -21,10 +21,12 @@ public class Main {
 	private static Pattern bool_op = Pattern.compile(".*(AND|OR|NOT).*");
 	private static Pattern comp = Pattern.compile("<|<=|==|!=|>=|>");
 	private static Pattern digits = Pattern.compile("\\d+");
+	private static Pattern deci = Pattern.compile("\\d+.\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
 	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
+	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
 	
 	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
@@ -157,7 +159,7 @@ public class Main {
 		return prefix + result + suffix;
 	}
 	
-	// Splits string but internal string and whitespace
+	// Splits string by internal string and whitespace
 	// Ex.      "foo bar" + x + y
 	// Becomes ["foo bar", +, x, +, y]
 	public static String[] tokenize(String rhs) {
@@ -181,30 +183,76 @@ public class Main {
 	}
 	
 	public static String read_var_assign(String line) {
-		if(var_assign.matcher(line).matches()) {
-			Matcher m = var_assign.matcher(line);
-			m.matches();
-			String rhs = m.group(2);
-			String type = getType(rhs);
-			var_map.put(m.group(1), type);
-			return type + " " + line;
+		Matcher m = var_assign.matcher(line);
+		m.matches();
+		String rhs = m.group(2);
+		String type = getType(rhs);
+		String lhsType = type;
+		String result = m.group(1) + " =";
+		
+		if(var_map.containsKey(m.group(1))) {
+			lhsType = var_map.get(m.group(1));
+			if(!lhsType.equals(type)) {
+				System.out.printf("Error, can not convert from \s to \s\n", lhsType, type);
+				System.exit(1);
+			}
+			lhsType = "";
 		}
-		return "";
+		
+		String token[] = tokenize(rhs);
+		for(int i=0;i<token.length;i++) {
+			result += " ";
+			System.out.println(token[i]);
+			if(token[i].matches(var.pattern()) && !token[i].matches(bool.pattern())) {
+				if(var_map.get(token[i]).equals("int") && type.equals("double")) {
+					result += "(double)" + token[i];
+				}
+				else result += token[i];
+			}
+			else {
+				result += token[i];
+			}
+		}
+		
+		var_map.put(m.group(1), type);
+		if(!lhsType.equals("")) result = " " + result;
+		return lhsType + result;
 	}
 	
+	// Evaluates the right hand side of assignments and determines type.
 	public static String getType(String val) {
-		if(val.matches(str.pattern())) return "String";
-		if(val.matches(bool.pattern())) return "boolean";
-		if(val.matches(digits.pattern())) return "int";
-		if(val.matches(var.pattern())) {
-			Matcher m = var.matcher(val);
-			m.matches();
-			return var_map.get(m.group(1));
+		String token[] = tokenize(val);
+		boolean hasFloat = false;
+		boolean hasString = false;
+		boolean hasInt = false;
+		boolean hasMath = false;
+		boolean plusOnly = true;
+		
+		for(int i=0; i<token.length;i++) {
+			//Simples
+			if(token[i].matches(comp.pattern())) return "boolean";
+			if(token[i].matches(deci.pattern())) hasFloat = true;
+			if(token[i].matches(str.pattern())) hasString = true;
+			if(token[i].matches(digits.pattern())) hasInt = true;
+			if(token[i].matches(mathOp.pattern())) {
+				hasMath = true;
+				if(!token[i].contains("+")) plusOnly = false;
+			}
+			
+			//Variables
+			if(token[i].matches(var.pattern())) {
+				if(var_map.get(token[i]) == "boolean") return "boolean"; 
+				if(var_map.get(token[i]) == "double") hasFloat = true;
+				if(var_map.get(token[i]) == "String") hasString = true;
+				if(var_map.get(token[i]) == "int") hasInt = true;
+			}
 		}
-		else {
-			System.out.println("Nothing found" + val);
-		}
-		return "";
+		if(!hasMath) plusOnly = false;
+		
+		if(hasString && !hasFloat && !hasInt && plusOnly) return "String";
+		if(hasFloat && hasMath) return "double";
+		return "int";
+		
 	}
 }
 	

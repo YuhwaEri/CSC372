@@ -2,9 +2,12 @@ public class out{
 	public static void main(String args[]) {
 		int x = 10;
 		int y = x + 5;
-		boolean bt = true;
-		boolean bf = false;
-		String str = "hello";
+		y = x / 5;
+		double a = (double)x + 0.5;
+		int b = x % 10;
+		int bt = true;
+		int bf = false;
+		int str = "hello";
 		System.out.print("world");
 		System.out.print(str + "world" + "!");
 		int i = x;
