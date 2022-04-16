@@ -1,0 +1,7 @@
+b1 = true
+b2 = false
+b3 = b1 AND b2
+b4 = b1 OR b2
+if (b4 == true)
+print(b4)
+end
