@@ -80,13 +80,17 @@ public class Main {
 				return "";
 			}
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
-			String line2 = reader.readLine().replaceAll("\\t", "");
+			String nextLine = reader.readLine();
+			if (nextLine == null) throw new IOException("Conditional requires end block");
+			String line2 = nextLine.replaceAll("\\t", "");
 			while(!line2.equals("end")) {
 				result+= "\t\t\t";
 				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
 				//System.out.println(result);
 				result+= "\n";
-				line2 = reader.readLine().replaceAll("\\t", "");
+				nextLine = reader.readLine();
+				if (nextLine == null) throw new IOException("Conditional requires end block");
+				line2 = nextLine.replaceAll("\\t", "");
 			}
 			result+= "\t\t}";
 			return result;
