@@ -24,8 +24,8 @@ public class Main {
 	private static Pattern deci = Pattern.compile("\\d+.\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
-	private static Pattern loop = Pattern.compile("^while\\s+(.+)");
-	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)");
+	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
+	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
 	
 	public static void main(String args[]) throws Exception {
@@ -42,9 +42,11 @@ public class Main {
 			writer.write("public class " + output + "{\n");
 			writer.write("\tpublic static void main(String args[]) {\n");
 			String line = reader.readLine();
+			String writeOut;
 			while(line != null) {
 				//System.out.println(line); //comment out when finished
-				String writeOut = parseLine(line, reader);
+				if (line.trim().equals("")) writeOut = "";//empty lines
+				else writeOut = parseLine(line, reader);
 				if(!writeOut.equals("")) writer.write("\t\t" + writeOut + "\n");
 				line = reader.readLine();
 			}
@@ -72,7 +74,11 @@ public class Main {
 		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
 			Matcher m = cond.matcher(line);
 			m.matches();
-			String rhs = m.group(2);
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {
+				System.out.println("No match in: " + line);
+				return "";
+			}
 			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
 			String line2 = reader.readLine().replaceAll("\\t", "");
 			while(!line2.equals("end")) {
@@ -86,8 +92,14 @@ public class Main {
 			return result;
 		}
 		if (line.matches(loop.pattern())) {
-			// To be implemented. check conditional code for an idea of how
-			// to implement nests.
+			Matcher m = loop.matcher(line);
+			m.matches();
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {//checks for syntax error in loop condition
+				System.out.println("No match in: " + line);
+				return "";
+			}
+			return m.group(1) + "(" + rhs + "){\n" + read_loop(reader) + "\t}";
 		}
 		else {
 			System.out.println("No match in: " + line);
@@ -126,10 +138,21 @@ public class Main {
 		return "";
 	}
 	
-	public static String read_loop(String cmd, BufferedReader reader) {
-		// Reader object to read next lines, "end" string to signal nest end(maybe)
-		
-		return "";
+	public static String read_loop(BufferedReader reader) throws IOException {
+		String nextLine = reader.readLine();
+		String result = "";
+		if (nextLine == null) throw new IOException("Loop statement requires end block");
+		nextLine = nextLine.replaceAll("\\t", "");
+		while (!nextLine.equals("end")) {
+			if (!nextLine.equals("")) result += "\t" + parseLine(nextLine, reader) + "\n";
+			
+			nextLine = reader.readLine();
+			if (nextLine == null) {
+				throw new IOException("Loop statement requires end block");
+			}
+			nextLine = nextLine.replaceAll("\\t", "");
+		}
+		return result;
 	}
 	
 	public static String read_cmd(String line) {
@@ -253,6 +276,11 @@ public class Main {
 		if(hasFloat && hasMath) return "double";
 		return "int";
 		
+	}
+	
+	public static boolean invalidV(String v) {
+		return !var.matcher(v).find() && !bool.matcher(v).find() &&
+				!digits.matcher(v).find() && !str.matcher(v).find();
 	}
 }
 	
