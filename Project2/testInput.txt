@@ -1,27 +1,45 @@
-x = 10
-y = x + 5
-y = x / 5
-a = x + 0.5
-b = x % 10
-bt = true
-bf = false
-z = bt AND bf
-str = "hello"
-print "world"
-print str + "world" + "!"
-i = x
+int1 = cmd1
+int2 = cmd2
 
-while i < x
-	while b < x
-		b = b + 1
-	end
-	i = i + 1
+max = 0
+min = 0
+
+if int1 > int2
+max = int1
+min = int2
+print "Max = " + max + "\n"
+end
+if int1 < int2
+max = int2
+min = int1
+print "Max = " + max + "\n"
 end
 
-if i < y
-	print 5 + 2
-	if y < 30
-		print "more stuff"
-	end
+sum = int1 + int2
+print "Sum = " + sum + "\n"
+
+diff = max - min
+print "Difference = " + diff + "\n"
+
+prod = int1 * int2
+print "Product = " + prod + "\n"
+
+x = int1
+y = int2
+while y != 0
+x = y
+y = x % y
 end
-	
+
+x2 = int1
+y2 = int2
+r2 = x2 % y2
+while r2 != 0
+x2 = y2
+y2 = r2
+r2 = x2 % y2
+end
+print "GCD = " + y2 + "\n"
+
+lcm = int1 / y2 * int2
+print "LCM = " + lcm + "\n"

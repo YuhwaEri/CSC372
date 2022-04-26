@@ -23,39 +23,59 @@ public class Main {
 	private static Pattern bool_op = Pattern.compile(".*(AND|OR|NOT).*");
 	private static Pattern comp = Pattern.compile("<|<=|==|!=|>=|>");
 	private static Pattern digits = Pattern.compile("\\d+");
-	private static Pattern deci = Pattern.compile("\\d+.\\d+");
+	private static Pattern deci = Pattern.compile("\\d*\\.\\d+");
 	private static Pattern str = Pattern.compile("\\s*(\".+\")\\s*");
 	private static Pattern var = Pattern.compile("\\s*([a-zA-Z]{1}[a-zA-Z0-9]*).*");
 	private static Pattern mathOp = Pattern.compile("\\+|-|/|\\*|%");
 	private static Pattern loop = Pattern.compile("^(while)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
 	private static Pattern cond = Pattern.compile("^(if)\\s+(.+)(<|<=|==|!=|>=|>)(.+)");
+	private static boolean IMMEDIATEMODE = false;
+	
 	
 	public static void main(String args[]) throws Exception {
 		BufferedReader reader;
 		FileWriter writer;
+		Scanner in;
 		try {
-			if (args.length == 0) throw new Exception("Command line input required");
-			String input = args[0];		//for implementation
-			String output = "out";
-			reader = new BufferedReader(new FileReader(
-					input));
-			writer = new FileWriter(output + ".java");
-			writer.write("public class " + output + "{\n");
-			writer.write("\tpublic static void main(String args[]) {\n");
-			String line = reader.readLine();
-			String writeOut;
-			while(line != null) {
-				//System.out.println(line); //comment out when finished
-				if (!line.trim().equals("")) {
-					writeOut = parseLine(line, reader);
-					writer.write("\t\t" + writeOut + "\n");
+			if (args.length == 0) {
+				IMMEDIATEMODE = true;
+				System.out.print("Immediate mode.\nShows translation in real time. Use 'exit' to quit\n>> ");
+				in = new Scanner(System.in);
+				String cmd = in.nextLine();
+				String translate;
+				while (!cmd.equals("exit")) {
+					translate = parseLine(cmd, in);
+					System.out.print(translate + "\n>> ");
+					cmd = in.nextLine();
 				}
-				line = reader.readLine();
 			}
-			writer.write("\t}\n}");
-			reader.close();
-			writer.close();
-			System.out.println("Parsing finished!");
+			else {
+				String input = args[0];	//for implementation
+				String output = "out";
+				reader = new BufferedReader(new FileReader(
+					input));
+				writer = new FileWriter(output + ".java");
+				writer.write("public class " + output + "{\n");
+				writer.write("\tpublic static void main(String args[]) {\n");
+				for (int i = 1; i < args.length; i++) {
+					writer.write("\t\t" + getType(args[i]) + " cmd" + i + " = " + args[i] + ";\n");
+					var_map.put("cmd" + i, getType(args[i]));
+				}
+				String line = reader.readLine();
+				String writeOut;
+				while(line != null) {
+					//System.out.println(line); //comment out when finished
+					if (!line.trim().equals("")) {
+						writeOut = parseLine(line, reader);
+						writer.write("\t\t" + writeOut + "\n");
+					}
+					line = reader.readLine();
+				}
+				writer.write("\t}\n}");
+				reader.close();
+				writer.close();
+				System.out.println("Parsing finished!");
+			}
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -64,6 +84,70 @@ public class Main {
 		}
 	}
 	
+	private static String parseLine(String line, Scanner reader) throws IOException {
+		if (line.matches(var_assign.pattern())){
+			return read_var_assign(line) + ";";
+		}
+		if (line.matches(cmd.pattern())) {
+			return read_cmd(line) + ";";
+		}
+		if (line.matches(cond.pattern())) { //Calls itself to read through nested code
+			Matcher m = cond.matcher(line);
+			m.matches();
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {
+				System.out.println("No match in: " + line);
+				return "";
+			}
+			String result = m.group(1) + "(" + read_bool_expr(rhs) + "){\n";
+			String line2 = reader.nextLine().replaceAll("\\t", "");
+			while(!line2.equals("end")) {
+				result+= "\t";
+				result+= parseLine(line2, reader).replaceAll("\n", "\n\t");
+				result+= "\n";
+				String next = reader.nextLine();
+				if (next == null) {
+					throw new IOException("Conditional statement requires end block");
+				}
+				line2 = next.replaceAll("\\t", "");
+			}
+			result+= "}";
+			return result;
+		}
+		if (line.matches(loop.pattern())) {
+			Matcher m = loop.matcher(line);
+			m.matches();
+			String rhs = m.group(2) + m.group(3) + m.group(4);
+			if (invalidV(m.group(4).trim())) {//checks for syntax error in loop condition
+				System.out.println("No match in: " + line);
+				return "";
+			}
+			return m.group(1) + "(" + rhs + "){\n" + read_loop(reader) + "\t}";	
+		}
+		
+		else {
+			System.out.println("No match in: " + line);
+		}
+		return "";
+	}
+
+	private static String read_loop(Scanner reader) throws IOException {
+		String nextLine = reader.nextLine();
+		String result = "";
+		if (nextLine == null) throw new IOException("Loop statement requires end block");
+		nextLine = nextLine.replaceAll("\\t", "");
+		while (!nextLine.equals("end")) {
+			if (!nextLine.equals("")) result += "\t\t\t" + parseLine(nextLine, reader) + "\n";
+			
+			nextLine = reader.nextLine();
+			if (nextLine == null) {
+				throw new IOException("Loop statement requires end block");
+			}
+			nextLine = nextLine.replaceAll("\\t", "");
+		}
+		return result;
+	}
+
 	//Distinguishes the type of statements and calls appropriate function
 	public static String parseLine(String line, BufferedReader reader) throws IOException{
 		
@@ -239,6 +323,15 @@ public class Main {
 			result += " ";
 			if(token[i].matches(var.pattern()) && !token[i].matches(bool.pattern())
 					&& !token[i].matches(bool_op.pattern())) {
+				if(var_map.get(token[i]) == null && IMMEDIATEMODE) {
+					System.out.printf("ERROR, undeclared variable %s\n", token[i]);
+					return "";
+				}
+				if(var_map.get(token[i]) == null) {
+					System.out.printf("ERROR, undeclared variable %s\n", token[i]);
+					System.exit(1);
+				}
+				
 				if(var_map.get(token[i]).equals("int") && type.equals("double")) {
 					result += "(double)" + token[i];
 				}
@@ -257,6 +350,7 @@ public class Main {
 	// Evaluates the right hand side of assignments and determines type.
 	public static String getType(String val) {
 		String token[] = tokenize(val);
+		
 		boolean hasFloat = false;
 		boolean hasString = false;
 		boolean hasInt = false;
@@ -286,7 +380,7 @@ public class Main {
 		}
 		
 		if(hasString && !hasFloat && !hasInt && plusOnly) return "String";
-		if(hasFloat && hasMath) return "double";
+		if(hasFloat) return "double";
 		return "int";
 	}
 	
